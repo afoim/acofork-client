@@ -28,6 +28,7 @@ jobs:
       - run: npm ci
       - run: node --test tests/business-api-origins.test.mjs tests/media-url-security.test.mjs tests/media-token-race.test.mjs
       - run: node --test tests/app-login-security.test.mjs tests/qr-session-security.test.mjs
+      - run: node --test tests/ad-policy.test.mjs tests/google-cmp.test.mjs
       - if: matrix.site == 'www'
         run: npm run build
       - if: matrix.site == '2x'

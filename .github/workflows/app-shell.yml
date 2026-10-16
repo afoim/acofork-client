@@ -16,9 +16,6 @@ on:
         description: 'Publish existing installer artifacts from this run (manual device testing)'
         required: false
         type: string
-  push:
-    branches: [main]
-    paths: ['.github/workflows/app-shell.yml']
 permissions:
   contents: read
   actions: read
@@ -268,9 +265,23 @@ jobs:
           ref: codex/webview-shell
           token: ${{ secrets.SOURCE_READ_TOKEN }}
           persist-credentials: false
-      - name: Set monotonic native build number
+      - name: Preserve the verified artifact build identity
         shell: bash
-        run: echo "APP_BUILD_NUMBER=$((1000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUBLISH_RUN: ${{ inputs.publish_run }}
+        run: |
+          number="$GITHUB_RUN_NUMBER"
+          attempt="$GITHUB_RUN_ATTEMPT"
+          if [ -n "$PUBLISH_RUN" ]; then
+            [[ "$PUBLISH_RUN" =~ ^[0-9]+$ ]] || exit 1
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$PUBLISH_RUN" > "$RUNNER_TEMP/source-run.json"
+            jq -e --arg repo "$GITHUB_REPOSITORY" '.conclusion == "success" and .head_branch == "main" and .path == ".github/workflows/app-shell.yml" and .head_repository.full_name == $repo' "$RUNNER_TEMP/source-run.json" > /dev/null
+            number=$(jq -r .run_number "$RUNNER_TEMP/source-run.json")
+            attempt=$(jq -r .run_attempt "$RUNNER_TEMP/source-run.json")
+          fi
+          echo "APP_BUILD_NUMBER=$((1000 + number))" >> "$GITHUB_ENV"
+          echo "APP_BUILD_ATTEMPT=$attempt" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v4
         with: { node-version: '24' }
       - uses: actions/download-artifact@v4

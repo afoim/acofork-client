@@ -1,0 +1,48 @@
+# Workflow-only repository. Application source stays private; never upload checkout or source maps.
+name: Publish APP resources to CNB
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/app-resources.yml']
+permissions:
+  contents: read
+concurrency:
+  group: app-resources-stable
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'afoim/acofork-client'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout private client source
+        uses: actions/checkout@v4
+        with:
+          repository: afoim/af_preact_spa
+          ref: codex/webview-shell
+          token: ${{ secrets.SOURCE_READ_TOKEN }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with: { node-version: '24', cache: npm }
+      - run: npm ci
+      - run: node --test tests/shell/*.test.mjs
+      - run: node --test tests/alipay-request-lifecycle.test.mjs tests/coding-plan-alipay.test.mjs
+      - run: node --test tests/business-api-origins.test.mjs tests/media-url-security.test.mjs tests/media-token-race.test.mjs
+      - run: node --test tests/app-login-security.test.mjs tests/qr-session-security.test.mjs
+      - run: node scripts/shell/check-types.mjs
+      - run: node scripts/shell/build-frontend.mjs
+        env:
+          RESOURCE_VERSION: web-${{ github.run_number }}-${{ github.run_attempt }}-${{ github.sha }}
+      - run: node scripts/shell/package-resources.mjs
+        if: github.ref == 'refs/heads/main'
+        env:
+          RESOURCE_SIGNING_PRIVATE_KEY: ${{ secrets.RESOURCE_SIGNING_PRIVATE_KEY }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: signed-app-resources
+          path: shell/release
+          retention-days: 30
+      - run: node scripts/shell/publish-cnb.mjs
+        if: github.ref == 'refs/heads/main'
+        env:
+          CNB_RELEASE_TOKEN: ${{ secrets.CNB_RELEASE_TOKEN }}

@@ -1,0 +1,47 @@
+# Workflow-only repository: checkout is private, uploaded artifacts are compiled static assets only.
+name: Build private website assets
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: website-assets
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { site: www, source: codex/www-login-release, output: dist }
+          - { site: 2x, source: codex/domestic-bootstrap, output: dist-domestic }
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: afoim/af_preact_spa
+          ref: ${{ matrix.source }}
+          token: ${{ secrets.SOURCE_READ_TOKEN }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with: { node-version: '24', cache: npm }
+      - run: npm ci
+      - run: node --test tests/business-api-origins.test.mjs tests/media-url-security.test.mjs tests/media-token-race.test.mjs
+      - run: node --test tests/app-login-security.test.mjs tests/qr-session-security.test.mjs
+      - if: matrix.site == 'www'
+        run: npm run build
+      - if: matrix.site == '2x'
+        run: node scripts/domestic/build.mjs
+      - name: Reject source maps in distributable
+        shell: bash
+        env:
+          OUTPUT: ${{ matrix.output }}
+        run: |
+          if find "$OUTPUT" -type f \( -name '*.map' -o -name '*.tsx' -o -name '*.rs' \) -print -quit | grep -q .; then
+            echo 'Unexpected source files in distributable'; exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: website-${{ matrix.site }}
+          path: ${{ matrix.output }}
+          retention-days: 7

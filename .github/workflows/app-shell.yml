@@ -70,7 +70,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with: { name: app-frontend, path: shell/bundle }
       - run: npm ci --prefix shell
-      - run: npm run tauri --prefix shell -- icon ../android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+      - run: npm run tauri --prefix shell -- icon ../public/brand/af-icon-1024.png
       - run: cargo test --manifest-path shell/src-tauri/Cargo.toml
       - run: npm run tauri --prefix shell -- build --bundles nsis
       - name: Launch WebView and verify native HTTP bridge
@@ -127,7 +127,7 @@ jobs:
         with: { name: app-frontend, path: shell/bundle }
       - run: npm ci --prefix shell
       - run: npm run tauri --prefix shell -- android init --ci
-      - run: npm run tauri --prefix shell -- icon ../android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+      - run: npm run tauri --prefix shell -- icon ../public/brand/af-icon-1024.png
       - run: node scripts/shell/configure-android.mjs
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.APP_ANDROID_KEYSTORE_BASE64 }}
@@ -203,7 +203,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with: { name: app-frontend, path: shell/bundle }
       - run: npm ci --prefix shell
-      - run: npm run tauri --prefix shell -- icon ../android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+      - run: npm run tauri --prefix shell -- icon ../public/brand/af-icon-1024.png
       - run: cargo test --manifest-path shell/src-tauri/Cargo.toml
       - run: npm run tauri --prefix shell -- build --target ${{ matrix.target }} --bundles ${{ matrix.bundles }} --ci
         env:
@@ -240,7 +240,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with: { name: app-frontend, path: shell/bundle }
       - run: npm ci --prefix shell
-      - run: npm run tauri --prefix shell -- icon ../android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+      - run: npm run tauri --prefix shell -- icon ../public/brand/af-icon-1024.png
       - run: npm run tauri --prefix shell -- ios init --ci
       - run: npm run tauri --prefix shell -- ios build --target aarch64 --ci --no-sign --build-number ${{ env.APP_BUILD_NUMBER }}
       - name: Verify unsigned device IPA

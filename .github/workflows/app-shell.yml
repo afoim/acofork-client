@@ -240,8 +240,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with: { name: app-frontend, path: shell/bundle }
       - run: npm ci --prefix shell
-      - run: npm run tauri --prefix shell -- icon ../public/brand/af-icon-1024.png
       - run: npm run tauri --prefix shell -- ios init --ci
+      - run: npm run tauri --prefix shell -- icon ../public/brand/af-icon-1024.png
       - run: npm run tauri --prefix shell -- ios build --target aarch64 --ci --no-sign --build-number ${{ env.APP_BUILD_NUMBER }}
       - name: Verify unsigned device IPA
         run: |

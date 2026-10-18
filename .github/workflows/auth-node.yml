@@ -1,0 +1,36 @@
+name: Build Auth Node artifact
+on:
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: Exact private Auth source commit
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: auth-node-build
+  cancel-in-progress: false
+jobs:
+  build:
+    if: github.repository == 'afoim/acofork-client' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: afoim/af_forum-backend
+          ref: ${{ inputs.source_ref }}
+          ssh-key: ${{ secrets.AUTH_SOURCE_SSH_KEY }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with: { node-version: '24', cache: npm }
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run build:node
+      - name: Record artifact checksum
+        run: sha256sum dist-node/handler.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: auth-node-handler
+          path: dist-node/handler.mjs
+          retention-days: 7

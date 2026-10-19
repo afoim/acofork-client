@@ -33,7 +33,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: afoim/af_preact_spa
-          ref: codex/webview-shell
+          ref: main
           token: ${{ secrets.SOURCE_READ_TOKEN }}
           persist-credentials: false
       - name: Set monotonic native build number
@@ -58,7 +58,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: afoim/af_preact_spa
-          ref: codex/webview-shell
+          ref: main
           token: ${{ secrets.SOURCE_READ_TOKEN }}
           persist-credentials: false
       - name: Set monotonic native build number
@@ -70,7 +70,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with: { name: app-frontend, path: shell/bundle }
       - run: npm ci --prefix shell
-      - run: npm run tauri --prefix shell -- icon ../public/brand/af-icon-1024.png
+      - run: npm run tauri --prefix shell -- icon ../public/app/acofork-icon.png
       - run: cargo test --manifest-path shell/src-tauri/Cargo.toml
       - run: npm run tauri --prefix shell -- build --bundles nsis
       - name: Launch WebView and verify native HTTP bridge
@@ -107,7 +107,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: afoim/af_preact_spa
-          ref: codex/webview-shell
+          ref: main
           token: ${{ secrets.SOURCE_READ_TOKEN }}
           persist-credentials: false
       - name: Set monotonic native build number
@@ -127,7 +127,7 @@ jobs:
         with: { name: app-frontend, path: shell/bundle }
       - run: npm ci --prefix shell
       - run: npm run tauri --prefix shell -- android init --ci
-      - run: npm run tauri --prefix shell -- icon ../public/brand/af-icon-1024.png
+      - run: npm run tauri --prefix shell -- icon ../public/app/acofork-icon.png
       - run: node scripts/shell/configure-android.mjs
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.APP_ANDROID_KEYSTORE_BASE64 }}
@@ -184,7 +184,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: afoim/af_preact_spa
-          ref: codex/webview-shell
+          ref: main
           token: ${{ secrets.SOURCE_READ_TOKEN }}
           persist-credentials: false
       - name: Set monotonic native build number
@@ -203,7 +203,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with: { name: app-frontend, path: shell/bundle }
       - run: npm ci --prefix shell
-      - run: npm run tauri --prefix shell -- icon ../public/brand/af-icon-1024.png
+      - run: npm run tauri --prefix shell -- icon ../public/app/acofork-icon.png
       - run: cargo test --manifest-path shell/src-tauri/Cargo.toml
       - run: npm run tauri --prefix shell -- build --target ${{ matrix.target }} --bundles ${{ matrix.bundles }} --ci
         env:
@@ -227,7 +227,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: afoim/af_preact_spa
-          ref: codex/webview-shell
+          ref: main
           token: ${{ secrets.SOURCE_READ_TOKEN }}
           persist-credentials: false
       - name: Set monotonic native build number
@@ -241,7 +241,7 @@ jobs:
         with: { name: app-frontend, path: shell/bundle }
       - run: npm ci --prefix shell
       - run: npm run tauri --prefix shell -- ios init --ci
-      - run: npm run tauri --prefix shell -- icon ../public/brand/af-icon-1024.png
+      - run: npm run tauri --prefix shell -- icon ../public/app/acofork-icon.png
       - run: npm run tauri --prefix shell -- ios build --target aarch64 --ci --no-sign --build-number ${{ env.APP_BUILD_NUMBER }}
       - name: Verify unsigned device IPA
         run: |
@@ -262,7 +262,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: afoim/af_preact_spa
-          ref: codex/webview-shell
+          ref: main
           token: ${{ secrets.SOURCE_READ_TOKEN }}
           persist-credentials: false
       - name: Preserve the verified artifact build identity
